@@ -37,12 +37,15 @@ else {setMsg(response.data);}
           {/* Card body */}
           <div className="flex-1 bg-slate-900 px-8 py-10">
 
-            {/* Header */}
+            {/* Header with logo */}
             <div className="mb-8">
-              <span className="text-xs font-semibold tracking-widest text-indigo-400 uppercase">
-                Control Panel
-              </span>
-              <h1 className="mt-1 text-2xl font-bold text-white tracking-tight">
+              <div className="w-24 h-24 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+              <img 
+                src="/logo.png" 
+                alt="MediQueue Logo" 
+              />
+            </div>
+              <h1 className="mt-1 text-2xl font-bold text-white tracking-tight text-center">
                 Admin Login
               </h1>
             </div>
