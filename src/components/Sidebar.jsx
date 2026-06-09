@@ -52,16 +52,23 @@ function Sidebar() {
   const location = useLocation();
 
   return (
-    <div className="w-60 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
+    <div className="w-64 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
 
-      {/* Brand */}
+      {/* Brand and logo*/}
       <div className="px-5 py-6 border-b border-slate-800">
-        <span className="text-xs font-semibold tracking-widest text-indigo-400 uppercase block mb-1">
-          Admin Panel
-        </span>
-        <h1 className="text-sm font-bold text-white leading-snug">
-          Smart Queue Management & Decision Support System
-        </h1>
+        <div className="flex flex-col items-center">
+          <div className="w-21 h-20 mb-3">
+            <img
+              src="/logo.png"
+              alt="Ocean View Resort logo"
+              className="object-contain w-full h-full rounded-xl"
+            />
+          </div>
+          <h2 className="text-3xl font-bold text-indigo-500 tracking-wide"> Admin Panel </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Queue Management System
+          </p>
+      </div>
       </div>
 
       {/* Nav */}
@@ -72,7 +79,7 @@ function Sidebar() {
             <Link
               key={to}
               to={to}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150
+              className={`flex items-center gap-3 px-4 py-3 mb-2 rounded-xl text-sm font-medium transition
                 ${active
                   ? "bg-indigo-600 text-white"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
