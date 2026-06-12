@@ -4,6 +4,10 @@ import AdminDashboard from"./pages/AdminDashboard";
 import ManageDoctors from "./pages/ManageDoctors";
 import ManageStaff from "./pages/ManageStaff";
 import ManageQueue from "./pages/ManageQueue";
+import PatientRegister from "./pages/PatientRegister";
+import PatientLogin from "./pages/PatientLogin";
+import PatientDashboard from "./pages/PatientDashboard";
+import PatientProfile from "./pages/PatientProfile";
 
 function App(){
 
@@ -22,6 +26,15 @@ return(
 <Route path="/staff" element={<ManageStaff />} />
 
 <Route path="/queue" element={<ManageQueue />} />
+
+<Route path="/patient-register" element={<PatientRegister/>} />
+
+<Route path="/patient-login" element={<PatientLogin/>} />
+
+<Route path="/patient-dashboard" element={<PatientDashboard/>} />
+
+<Route path="/patient-profile" element={<PatientProfile/>} />
+
 
 </Routes>
 
