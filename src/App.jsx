@@ -3,6 +3,7 @@ import AdminLogin from"./pages/AdminLogin";
 import AdminDashboard from"./pages/AdminDashboard";
 import ManageDoctors from "./pages/ManageDoctors";
 import ManageStaff from "./pages/ManageStaff";
+import ManageQueue from "./pages/ManageQueue";
 
 function App(){
 
@@ -19,6 +20,8 @@ return(
 <Route path="/doctors" element={<ManageDoctors/>}/>
 
 <Route path="/staff" element={<ManageStaff />} />
+
+<Route path="/queue" element={<ManageQueue />} />
 
 </Routes>
 
