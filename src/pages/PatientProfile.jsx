@@ -1,196 +1,156 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function PatientProfile(){
-
-const email=
-localStorage.getItem(
-"patient"
-);
-
-const [patient,setPatient]=useState({});
-
-const [msg,setMsg]=useState("");
-
-async function loadProfile(){
-
-try{
-
-const response=
-await api.get(
-`/patient/profile/${email}`
-);
-
-setPatient(
-response.data
-);
-
-}
-
-catch{
-
-setMsg(
-"Load Failed"
-);
-
-}
-
-}
-
-useEffect(()=>{
-
-loadProfile();
-
-},[]);
-
-async function save(){
-
-try{
-
-await api.put(
-"/patient/profile",
-patient
-);
-
-setMsg(
-"✓ Profile Updated"
-);
-
-}
-
-catch{
-
-setMsg(
-"Update Failed"
-);
-
-}
-
-}
-
-return(
-
-<div className="p-10">
-
-<h1 className="text-3xl font-bold mb-8">
-
-Patient Profile
-
-</h1>
-
-{
-
-msg&&(
-
-<div className="mb-4 text-green-600">
-
-{msg}
-
-</div>
-
-)
-
-}
-
-<div className="space-y-4 max-w-lg">
-
-<input
-value={patient.fullName||""}
-onChange={(e)=>
-
-setPatient({
-
-...patient,
-
-fullName:
-e.target.value
-
-})
-
-}
-className="w-full border p-3 rounded"
-/>
-
-<input
-value={patient.email||""}
-disabled
-className="w-full border p-3 rounded"
-/>
-
-<input
-value={patient.phone||""}
-onChange={(e)=>
-
-setPatient({
-
-...patient,
-
-phone:
-e.target.value
-
-})
-
-}
-className="w-full border p-3 rounded"
-/>
-
-<input
-type="password"
-value={patient.password||""}
-onChange={(e)=>
-
-setPatient({
-
-...patient,
-
-password:
-e.target.value
-
-})
-
-}
-className="w-full border p-3 rounded"
-/>
-
-<input
-type="date"
-value={patient.dateOfBirth||""}
-onChange={(e)=>
-
-setPatient({
-
-...patient,
-
-dateOfBirth:
-e.target.value
-
-})
-
-}
-className="w-full border p-3 rounded"
-/>
-
-<button
-onClick={save}
-className="
-bg-indigo-600
-text-white
-px-6
-py-3
-rounded
-"
->
-
-Save Profile
-
-</button>
-
-</div>
-
-</div>
-
-);
-
+function PatientProfile() {
+  const email = localStorage.getItem("patient");
+
+  const [patient, setPatient] = useState({});
+  const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("");
+
+  async function loadProfile() {
+    try {
+      const response = await api.get(`/patient/profile/${email}`);
+      setPatient(response.data);
+    } catch {
+      setMsg("Failed to load profile");
+      setMsgType("error");
+    }
+  }
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  async function save() {
+    try {
+      await api.put("/patient/profile", patient);
+      setMsg("✓ Profile updated successfully");
+      setMsgType("success");
+      setTimeout(() => setMsg(""), 3000);
+    } catch {
+      setMsg("Update failed. Please try again.");
+      setMsgType("error");
+      setTimeout(() => setMsg(""), 3000);
+    }
+  }
+
+  const inputClass =
+    "w-full bg-transparent border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors duration-200";
+
+  const disabledInputClass =
+    "w-full bg-slate-800/50 border border-slate-700/50 text-slate-500 rounded-lg px-4 py-3 text-sm cursor-not-allowed";
+
+  return (
+    <div className="min-h-screen bg-slate-950 px-4 py-12">
+      {/* Subtle background accent */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative max-w-lg mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium text-teal-400 tracking-widest uppercase">Account</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-100">Patient Profile</h1>
+          <p className="mt-1 text-sm text-slate-500">Update your personal details below.</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl shadow-black/40">
+
+          {/* Message banner */}
+          {msg && (
+            <div className={`mb-6 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-300 ${
+              msgType === "success"
+                ? "bg-teal-500/10 border border-teal-500/20 text-teal-400"
+                : "bg-red-500/10 border border-red-500/20 text-red-400"
+            }`}>
+              {msg}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">Full Name</label>
+              <input
+                value={patient.fullName || ""}
+                onChange={(e) => setPatient({ ...patient, fullName: e.target.value })}
+                placeholder="Your full name"
+                className={inputClass}
+              />
+            </div>
+
+            {/* Email — read only */}
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">
+                Email
+                <span className="ml-2 text-slate-600 font-normal normal-case tracking-normal">read-only</span>
+              </label>
+              <input
+                value={patient.email || ""}
+                disabled
+                className={disabledInputClass}
+              />
+            </div>
+
+            {/* Phone & DOB — side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">Phone</label>
+                <input
+                  value={patient.phone || ""}
+                  onChange={(e) => setPatient({ ...patient, phone: e.target.value })}
+                  placeholder="+94 77 000 0000"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">Date of Birth</label>
+                <input
+                  type="date"
+                  value={patient.dateOfBirth || ""}
+                  onChange={(e) => setPatient({ ...patient, dateOfBirth: e.target.value })}
+                  className={`${inputClass} [color-scheme:dark]`}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5 tracking-wide">New Password</label>
+              <input
+                type="password"
+                value={patient.password || ""}
+                onChange={(e) => setPatient({ ...patient, password: e.target.value })}
+                placeholder="Leave blank to keep current"
+                className={inputClass}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-slate-800 pt-4">
+              <button
+                onClick={save}
+                className="w-full bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-slate-950 font-semibold py-3 rounded-lg text-sm tracking-wide transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
+                Save Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default PatientProfile;
