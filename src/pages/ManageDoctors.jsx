@@ -32,18 +32,38 @@ function ManageDoctors() {
   useEffect(() => { loadDoctors(); }, []);
 
   async function addDoctor() {
-    try {
-      await api.post("/doctors", { doctorName, specialization, availability, roomNumber });
-      setDoctorName("");
-      setSpecialization("");
-      setAvailability("Available");
-      setRoomNumber("");
-      loadDoctors();
-      showMessage("Doctor Added Successfully", "success");
-    } catch {
-      showMessage("Failed to Add Doctor", "error");
+    if (!doctorName.trim()) {
+     showMessage("Doctor Name is required!", "error");
+    return;
     }
+    if (!specialization.trim()) {
+     showMessage("Specialization is required!", "error");
+    return;
+    }
+
+    if (!roomNumber.trim()) {
+     showMessage("Room Number is required!", "error");
+
+    return;
+    }
+    try {
+     await api.post("/doctors",
+      {doctorName,specialization,availability,roomNumber}
+    );
+
+  setDoctorName("");
+  setSpecialization("");
+  setAvailability("Available");
+  setRoomNumber("");
+  loadDoctors();
+  showMessage("Doctor Added Successfully","success");
   }
+
+catch {
+
+     showMessage("Failed to Add Doctor","error");
+      }
+}
 
   async function deleteDoctor(id) {
     try {
@@ -55,17 +75,36 @@ function ManageDoctors() {
     }
   }
 
-  async function updateDoctor() {
-    try {
-      await api.put("/doctors", editDoctor);
-      setEditingId(null);
-      setEditDoctor({});
-      loadDoctors();
-      showMessage("Doctor Updated Successfully", "success");
-    } catch {
-      showMessage("Update Failed", "error");
-    }
-  }
+async function updateDoctor() {
+
+if (!editDoctor.doctorName?.trim()) {
+ showMessage("Doctor Name cannot be empty!","error");
+return;
+}
+
+if (!editDoctor.specialization?.trim()) {
+ showMessage("Specialization cannot be empty!","error");
+return;
+}
+
+if (!editDoctor.roomNumber?.trim()) {
+ showMessage("Room Number cannot be empty!","error");
+return;
+}
+try {
+await api.put("/doctors",editDoctor);
+
+setEditingId(null);
+
+setEditDoctor({});
+
+loadDoctors();
+
+showMessage("Doctor Updated Successfully","success");
+}
+catch {showMessage("Update Failed","error");
+}
+}
 
   const inputClass = "bg-slate-800 text-white placeholder-slate-500 border border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition w-full";
   const inlineInputClass = "bg-slate-800 text-white border border-slate-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition w-full";
