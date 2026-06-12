@@ -18,6 +18,7 @@ return(
 <Routes>
 
 <Route path="/"element={<AdminLogin/>}/>
+<Route path="/"element={<PatientLogin/>}/>
 
 <Route path="/dashboard"element={<AdminDashboard/>}/>
 
