@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 function PatientProfile() {
   const email = localStorage.getItem("patient");
+  const navigate = useNavigate();
 
   const [patient, setPatient] = useState({});
   const [msg, setMsg] = useState("");
@@ -51,17 +53,30 @@ function PatientProfile() {
 
       <div className="relative max-w-lg mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-              <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-teal-400 tracking-widest uppercase">Account</span>
             </div>
-            <span className="text-xs font-medium text-teal-400 tracking-widest uppercase">Account</span>
+            <h1 className="text-2xl font-semibold text-slate-100">Patient Profile</h1>
+            <p className="mt-1 text-sm text-slate-500">Update your personal details below.</p>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-100">Patient Profile</h1>
-          <p className="mt-1 text-sm text-slate-500">Update your personal details below.</p>
+
+          {/* Back to Dashboard */}
+          <button
+            onClick={() => navigate("/patient-dashboard")}
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-300 hover:text-slate-100 border border-slate-700 hover:border-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Dashboard
+          </button>
         </div>
 
         {/* Card */}
