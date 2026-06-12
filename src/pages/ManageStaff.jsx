@@ -30,37 +30,63 @@ function ManageStaff() {
 
   useEffect(() => { loadStaff(); }, []);
 
-  async function addStaff() {
-    try {
-      await api.post("/staff", { fullName, email, password });
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      loadStaff();
-      showMessage("Staff added successfully ✓", "success");
-    } catch {
-      showMessage("Add failed", "error");
-    }
-  }
+//Add Staff
+async function addStaff(){
+ if(!fullName.trim()){
+  showMessage("Full Name is required!","error");
+ return;
+}
+ if(!email.trim()){showMessage("Email is required!","error");
+ return;
+}
+if(!password.trim()){showMessage("Password is required!","error");
+return;
+}
+ try{await api.post("/staff",
+  {fullName,email,password}
+ );
 
-  async function updateStaff() {
-    try {
-      await api.put("/staff", editStaff);
-      setEditingId(null);
-      loadStaff();
-      showMessage("Staff updated successfully ✓", "success");
-    } catch {
-      showMessage("Update failed", "error");
+    setFullName("");
+    setEmail("");
+    setPassword("");
+    loadStaff();
+    showMessage("Staff Added Successfully","success");}
+    catch{showMessage("Add Failed","error");}
     }
-  }
 
+//Update Staff
+async function updateStaff(){
+ if(!editStaff.fullName?.trim()){
+  showMessage("Full Name cannot be empty!","error");
+ return;
+  }
+ if(!editStaff.email?.trim()){
+  showMessage("Email cannot be empty!","error");
+ return;
+  }
+ if(!editStaff.password?.trim()){
+  showMessage("Password cannot be empty!","error");
+ return;
+ }
+try{
+ await api.put("/staff",editStaff);
+    setEditingId(null);
+    setEditStaff({});
+    loadStaff();
+  showMessage("Staff Updated Successfully","success");
+   }catch{
+  showMessage("Update Failed!","error");
+   }
+}
+
+//Delete Staff
   async function deleteStaff(id) {
     try {
       await api.delete(`/staff/${id}`);
       loadStaff();
-      showMessage("Staff deleted successfully ✓", "success");
+      showMessage("Staff Deleted Successfully", "success");
     } catch {
-      showMessage("Delete failed", "error");
+      showMessage("Delete Failed", "error");
     }
   }
 
@@ -162,7 +188,7 @@ function ManageStaff() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-800">
-                {["Name", "Email", "Actions"].map((h) => (
+                {["Name", "Email", "Password", "Actions"].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     {h}
                   </th>
@@ -189,6 +215,15 @@ function ManageStaff() {
                       : s.email
                     }
                   </td>
+                  <td className="px-5 py-3 text-slate-400">
+
+                    {
+                    editingId===s.staffId
+                      ?<input type="text" value={editStaff.password || ""} onChange={(e)=> setEditStaff({...editStaff,password:e.target.value})
+                    }
+                    className={inlineInputClass}/>
+                      :s.password}
+                    </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
                       {editingId === s.staffId ? (
