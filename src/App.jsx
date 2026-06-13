@@ -8,6 +8,7 @@ import PatientRegister from "./pages/PatientRegister";
 import PatientLogin from "./pages/PatientLogin";
 import PatientDashboard from "./pages/PatientDashboard";
 import PatientProfile from "./pages/PatientProfile";
+import PatientAppointments from "./pages/PatientAppointments";
 
 function App(){
 
@@ -18,6 +19,7 @@ return(
 <Routes>
 
 <Route path="/"element={<AdminLogin/>}/>
+
 <Route path="/"element={<PatientLogin/>}/>
 
 <Route path="/dashboard"element={<AdminDashboard/>}/>
@@ -36,6 +38,9 @@ return(
 
 <Route path="/patient-profile" element={<PatientProfile/>} />
 
+<Route path="/appointments" element={<PatientAppointments/>} />
+
+<Route path="/appointments" element={<PatientAppointments/>} />
 
 </Routes>
 
