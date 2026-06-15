@@ -9,16 +9,31 @@ function PatientAppointments() {
   const [patient, setPatient] = useState({});
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
+
   const [doctorId, setDoctorId] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
+
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("");
 
   function showMessage(text, type) {
     setMsg(text);
     setMsgType(type);
-    setTimeout(() => setMsg(""), 3000);
+    setTimeout(() => {
+      setMsg("");
+    }, 3000);
+  }
+
+  const todayDate = new Date().toISOString().split("T")[0];
+
+  async function loadDoctors() {
+    try {
+      const response = await api.get("/doctors");
+      setDoctors(response.data);
+    } catch {
+      showMessage("Failed to load doctors", "error");
+    }
   }
 
   async function loadPatient() {
@@ -28,15 +43,6 @@ function PatientAppointments() {
       loadAppointments(response.data.patientId);
     } catch {
       showMessage("Failed to load patient", "error");
-    }
-  }
-
-  async function loadDoctors() {
-    try {
-      const response = await api.get("/doctors");
-      setDoctors(response.data);
-    } catch {
-      showMessage("Failed to load doctors", "error");
     }
   }
 
@@ -56,20 +62,33 @@ function PatientAppointments() {
 
   async function bookAppointment() {
     if (!doctorId || !appointmentDate || !appointmentTime) {
-      showMessage("Fill all fields", "error");
+      showMessage("Fill all fields!", "error");
       return;
     }
+
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+
+    if (appointmentDate === todayDate && appointmentTime < currentTime) {
+      showMessage("Cannot select old time", "error");
+      return;
+    }
+
     try {
       await api.post("/appointment", {
         patientId: Number(patient.patientId),
         doctorId: Number(doctorId),
-        appointmentDate,
+        appointmentDate: appointmentDate,
         appointmentTime: `${appointmentTime}:00`,
         status: "Booked",
       });
+
       setDoctorId("");
       setAppointmentDate("");
       setAppointmentTime("");
+
       loadAppointments(patient.patientId);
       showMessage("✓ Appointment Booked", "success");
     } catch {
@@ -86,8 +105,6 @@ function PatientAppointments() {
       showMessage("Cancel Failed!", "error");
     }
   }
-
-  const selectedDoctor = doctors.find((d) => String(d.doctorId) === doctorId);
 
   const inputClass =
     "w-full bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors duration-200 shadow-sm";
@@ -151,7 +168,7 @@ function PatientAppointments() {
             <h2 className="text-sm font-semibold text-slate-700 tracking-wide uppercase">Book Appointment</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Doctor select */}
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1.5 tracking-wide">Doctor</label>
@@ -163,7 +180,7 @@ function PatientAppointments() {
                 <option value="">Select Doctor</option>
                 {doctors.map((d) => (
                   <option key={d.doctorId} value={d.doctorId}>
-                    {d.doctorName} — {d.specialization}
+                    {d.doctorName}
                   </option>
                 ))}
               </select>
@@ -174,6 +191,7 @@ function PatientAppointments() {
               <label className="block text-xs font-medium text-slate-600 mb-1.5 tracking-wide">Date</label>
               <input
                 type="date"
+                min={todayDate}
                 value={appointmentDate}
                 onChange={(e) => setAppointmentDate(e.target.value)}
                 className={`${inputClass} [color-scheme:light]`}
@@ -192,29 +210,12 @@ function PatientAppointments() {
             </div>
           </div>
 
-          {/* Selected doctor info */}
-          {selectedDoctor && (
-            <div className="mt-5 bg-indigo-50 border border-indigo-100 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: "Doctor", value: selectedDoctor.doctorName },
-                { label: "Specialization", value: selectedDoctor.specialization },
-                { label: "Availability", value: selectedDoctor.availability },
-                { label: "Room", value: selectedDoctor.roomNumber },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-xs text-indigo-400 font-medium mb-0.5">{label}</p>
-                  <p className="text-sm text-indigo-700 font-semibold">{value}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
           <div className="border-t border-slate-100 mt-6 pt-5">
             <button
               onClick={bookAppointment}
               className="bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg text-sm tracking-wide transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white shadow-sm"
             >
-              Book Appointment
+              Book
             </button>
           </div>
         </div>
