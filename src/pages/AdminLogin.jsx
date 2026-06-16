@@ -41,7 +41,7 @@ else {setMsg(response.data);}
             <div className="mb-8">
               <div className="w-24 h-24 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
               <img 
-                src="/logo.png" 
+                src="/logo.png"  
                 alt="MediQueue Logo" 
               />
             </div>
@@ -103,7 +103,7 @@ else {setMsg(response.data);}
 
         {/* Footer note */}
         <p className="mt-5 text-center text-xs text-slate-600">
-          Restricted access — authorised personnel only
+          Restricted access — authorized personnel only
         </p>
       </div>
     </div>
