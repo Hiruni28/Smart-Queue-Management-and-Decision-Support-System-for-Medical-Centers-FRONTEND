@@ -1,6 +1,6 @@
 function Topbar() {
   return (
-    <div className="bg-slate-700 border-b border-slate-800 px-8 py-4 flex items-center justify-between">
+    <div className="bg-slate-900 border-b border-slate-800 px-8 py-4 flex items-center justify-between">
 
       {/* Page title */}
       <div>
