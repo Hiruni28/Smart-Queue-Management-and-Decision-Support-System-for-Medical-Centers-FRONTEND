@@ -45,7 +45,7 @@ function PatientLogin() {
     "w-full bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-colors duration-200 shadow-sm";
 
   return (
-    <div className="min-h-screen bg-slate-400 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-slate-300 flex items-center justify-center px-4">
       {/* Subtle background accent */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl" />
