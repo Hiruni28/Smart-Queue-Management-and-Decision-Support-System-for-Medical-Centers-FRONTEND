@@ -44,7 +44,7 @@ function PatientProfile() {
     "w-full bg-slate-100 border border-slate-200 text-slate-400 rounded-lg px-4 py-3 text-sm cursor-not-allowed shadow-sm";
 
   return (
-    <div className="min-h-screen bg-slate-400 px-4 py-12">
+    <div className="min-h-screen bg-slate-300 px-4 py-12">
       {/* Subtle background accent */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl" />
