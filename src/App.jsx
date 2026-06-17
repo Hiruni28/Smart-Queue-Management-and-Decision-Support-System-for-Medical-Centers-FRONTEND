@@ -1,5 +1,4 @@
-import {BrowserRouter,Routes,Route}
-from "react-router-dom";
+import {BrowserRouter,Routes,Route} from "react-router-dom";
 
 import AdminLogin from "./pages/AdminLogin";
 
@@ -25,6 +24,8 @@ import StaffLogin from "./pages/StaffLogin";
 
 import StaffDashboard from "./pages/StaffDashboard";
 
+import StaffAppointments from "./pages/StaffAppointments";
+
 function App(){
 
 return(
@@ -33,65 +34,31 @@ return(
 
 <Routes>
 
-<Route
-path="/"
-element={<AdminLogin/>}
-/>
+<Route path="/" element={<AdminLogin/>}/>
 
-<Route
-path="/dashboard"
-element={<AdminDashboard/>}
-/>
+<Route path="/dashboard" element={<AdminDashboard/>}/>
 
-<Route
-path="/doctors"
-element={<ManageDoctors/>}
-/>
+<Route path="/doctors" element={<ManageDoctors/>}/>
 
-<Route
-path="/staff"
-element={<ManageStaff/>}
-/>
+<Route path="/staff" element={<ManageStaff/>}/>
 
-<Route
-path="/queue"
-element={<ManageQueue/>}
-/>
+<Route path="/queue" element={<ManageQueue/>}/>
 
-<Route
-path="/patient-register"
-element={<PatientRegister/>}
-/>
+<Route path="/patient-register" element={<PatientRegister/>}/>
 
-<Route
-path="/patient-login"
-element={<PatientLogin/>}
-/>
+<Route path="/patient-login" element={<PatientLogin/>}/>
 
-<Route
-path="/patient-dashboard"
-element={<PatientDashboard/>}
-/>
+<Route path="/patient-dashboard" element={<PatientDashboard/>}/>
 
-<Route
-path="/patient-profile"
-element={<PatientProfile/>}
-/>
+<Route path="/patient-profile" element={<PatientProfile/>}/>
 
-<Route
-path="/appointments"
-element={<PatientAppointments/>}
-/>
+<Route path="/appointments" element={<PatientAppointments/>}/>
 
-<Route
-path="/staff-login"
-element={<StaffLogin/>}
-/>
+<Route path="/staff-login" element={<StaffLogin/>}/>
 
-<Route
-path="/staff-dashboard"
-element={<StaffDashboard/>}
-/>
+<Route path="/staff-dashboard" element={<StaffDashboard/>}/>
+
+<Route path="/staff-appointments" element={<StaffAppointments/>}/>
 
 </Routes>
 
