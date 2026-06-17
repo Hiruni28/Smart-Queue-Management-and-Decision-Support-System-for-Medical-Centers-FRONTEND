@@ -12,6 +12,16 @@ const navItems = [
     ),
   },
   {
+    to: "/staff-appointments",
+    label: "Appointments",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
     to: "/walkin",
     label: "Walk-In Patients",
     icon: (
@@ -44,7 +54,6 @@ const navItems = [
 function StaffSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-
   const staff = localStorage.getItem("staff");
 
   function logout() {
@@ -59,19 +68,15 @@ function StaffSidebar() {
       <div className="px-5 py-6 border-b border-slate-800">
         <div className="flex flex-col items-center text-center">
           <div className="w-21 h-20 mb-3 rounded-2xl overflow-hidden bg-slate-800 border border-slate-700 flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="object-contain w-full h-full"
-            />
+            <img src="/logo.png" alt="Logo" className="object-contain w-full h-full" />
           </div>
-          <h2 className="text-3xl font-bold text-teal-400 tracking-tight">Staff Panel</h2>
+          <h2 className="text-lg font-bold text-teal-400 tracking-tight">Staff Panel</h2>
           <p className="text-xs text-slate-500 mt-0.5">Queue Management System</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-5 flex flex-col gap-1">
+      <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const active = location.pathname === item.to;
           return (
@@ -84,7 +89,6 @@ function StaffSidebar() {
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
             >
-              {/* Icon wrapper */}
               <span className={`w-7 h-7 flex items-center justify-center rounded-lg shrink-0 transition-colors
                 ${active
                   ? "bg-teal-500/30 text-white"
@@ -98,7 +102,8 @@ function StaffSidebar() {
         })}
       </nav>
 
-        {/* Logout button */}
+      {/* Logout */}
+      <div className="px-3 py-4 border-t border-slate-800 space-y-2">
         <button
           onClick={logout}
           className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
@@ -114,7 +119,8 @@ function StaffSidebar() {
           </span>
           Logout
         </button>
-      
+      </div>
+
     </div>
   );
 }
