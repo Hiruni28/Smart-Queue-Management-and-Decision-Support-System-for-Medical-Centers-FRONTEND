@@ -1,10 +1,12 @@
 import { useLocation } from "react-router-dom";
 
 const pageTitles = {
-  "/staff-dashboard": "Dashboard",
-  "/walkin": "Walk-In Patients",
-  "/staff-queue": "Queue",
-  "/staff-schedules": "Schedules",
+  "/staff-dashboard":    "Dashboard",
+  "/walkin":             "Walk-In Patients",
+  "/staff-patients":     "Patient Management",
+  "/staff-appointments": "Appointments",
+  "/staff-schedules":    "Doctor Schedules",
+  "/staff-queue":        "Queue",
 };
 
 function StaffTopbar() {
@@ -15,11 +17,10 @@ function StaffTopbar() {
   return (
     <div className="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between">
 
-      {/* Left — dynamic page title */}
+      {/* Left — page title */}
       <div>
-        <h2 className="text-lg font-bold text-white leading-tight">
-          Staff Dashboard
-        </h2>
+        <p className="text-xs uppercase tracking-widest text-slate-500 mb-0.5">Staff Portal</p>
+        <h2 className="text-sm font-semibold text-white tracking-tight">{pageTitle}</h2>
       </div>
 
       {/* Right — staff info */}
