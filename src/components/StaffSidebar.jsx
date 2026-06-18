@@ -22,11 +22,12 @@ const navItems = [
     ),
   },
   {
-    to: "/walkin",
-    label: "Walk-In Patients",
+    to: "/staff-patients",
+    label: "Patients",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
   },
@@ -41,11 +42,11 @@ const navItems = [
   },
   {
     to: "/staff-schedules",
-    label: "Schedules",
+    label: "Doctor Schedules",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round"
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
   },
@@ -70,7 +71,7 @@ function StaffSidebar() {
           <div className="w-21 h-20 mb-3 rounded-2xl overflow-hidden bg-slate-800 border border-slate-700 flex items-center justify-center">
             <img src="/logo.png" alt="Logo" className="object-contain w-full h-full" />
           </div>
-          <h2 className="text-lg font-bold text-teal-400 tracking-tight">Staff Panel</h2>
+          <h2 className="text-3xl font-bold text-teal-400 tracking-tight">Staff Panel</h2>
           <p className="text-xs text-slate-500 mt-0.5">Queue Management System</p>
         </div>
       </div>
