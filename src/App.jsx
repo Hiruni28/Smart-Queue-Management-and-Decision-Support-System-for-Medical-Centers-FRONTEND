@@ -1,37 +1,28 @@
-import {BrowserRouter,Routes,Route} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AdminLogin from "./pages/AdminLogin";
-
 import AdminDashboard from "./pages/AdminDashboard";
-
 import ManageDoctors from "./pages/ManageDoctors";
-
 import ManageStaff from "./pages/ManageStaff";
-
 import ManageQueue from "./pages/ManageQueue";
 
 import PatientRegister from "./pages/PatientRegister";
-
 import PatientLogin from "./pages/PatientLogin";
-
 import PatientDashboard from "./pages/PatientDashboard";
-
 import PatientProfile from "./pages/PatientProfile";
-
 import PatientAppointments from "./pages/PatientAppointments";
 
 import StaffLogin from "./pages/StaffLogin";
-
 import StaffDashboard from "./pages/StaffDashboard";
-
 import StaffAppointments from "./pages/StaffAppointments";
+import StaffPatients from "./pages/StaffPatients";
+import StaffSchedules from "./pages/StaffSchedules";
 
-function App(){
+function App() {
 
-return(
+return (
 
 <BrowserRouter>
-
 <Routes>
 
 <Route path="/" element={<AdminLogin/>}/>
@@ -60,12 +51,14 @@ return(
 
 <Route path="/staff-appointments" element={<StaffAppointments/>}/>
 
-</Routes>
+<Route path="/staff-patients" element={<StaffPatients/>}/>
 
+<Route path="/staff-schedules" element={<StaffSchedules/>}/>
+
+</Routes>
 </BrowserRouter>
 
 );
-
 }
 
 export default App;
