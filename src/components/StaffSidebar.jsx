@@ -50,6 +50,16 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    to: "/staff-doctor-status",
+    label: "Doctor Coordination",
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
 ];
 
 function StaffSidebar() {
@@ -77,7 +87,7 @@ function StaffSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = location.pathname === item.to;
           return (
