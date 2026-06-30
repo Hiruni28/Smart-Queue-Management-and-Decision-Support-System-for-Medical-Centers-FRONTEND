@@ -55,13 +55,27 @@ const cards = [
       </svg>
     ),
   },
+  {
+    title: "Doctor Status",
+    value: "Update",
+    description: "Manage doctor arrivals and delays",
+    to: "/staff-doctor-status",
+    accent: "emerald",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
 ];
 
 const accentMap = {
-  teal:   { icon: "bg-teal-600/10 border-teal-500/20 text-teal-400",   value: "text-teal-400",   hover: "hover:border-teal-500/40"   },
-  indigo: { icon: "bg-indigo-600/10 border-indigo-500/20 text-indigo-400", value: "text-indigo-400", hover: "hover:border-indigo-500/40" },
-  violet: { icon: "bg-violet-600/10 border-violet-500/20 text-violet-400", value: "text-violet-400", hover: "hover:border-violet-500/40" },
-  sky:    { icon: "bg-sky-600/10 border-sky-500/20 text-sky-400",       value: "text-sky-400",    hover: "hover:border-sky-500/40"    },
+  teal:    { icon: "bg-teal-600/10 border-teal-500/20 text-teal-400",    value: "text-teal-400",    hover: "hover:border-teal-500/40"    },
+  indigo:  { icon: "bg-indigo-600/10 border-indigo-500/20 text-indigo-400", value: "text-indigo-400", hover: "hover:border-indigo-500/40" },
+  violet:  { icon: "bg-violet-600/10 border-violet-500/20 text-violet-400", value: "text-violet-400", hover: "hover:border-violet-500/40" },
+  sky:     { icon: "bg-sky-600/10 border-sky-500/20 text-sky-400",       value: "text-sky-400",     hover: "hover:border-sky-500/40"     },
+  emerald: { icon: "bg-emerald-600/10 border-emerald-500/20 text-emerald-400", value: "text-emerald-400", hover: "hover:border-emerald-500/40" },
 };
 
 function Card({ title, value, description, icon, accent, to }) {
@@ -120,7 +134,7 @@ function StaffDashboard() {
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {cards.map((card) => (
               <Card key={card.title} {...card} />
             ))}
