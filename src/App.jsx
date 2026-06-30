@@ -17,6 +17,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 import StaffAppointments from "./pages/StaffAppointments";
 import StaffPatients from "./pages/StaffPatients";
 import StaffSchedules from "./pages/StaffSchedules";
+import StaffDoctorStatus from "./pages/StaffDoctorStatus";
 
 function App() {
 
@@ -54,6 +55,8 @@ return (
 <Route path="/staff-patients" element={<StaffPatients/>}/>
 
 <Route path="/staff-schedules" element={<StaffSchedules/>}/>
+
+<Route path="/staff-doctor-status" element={<StaffDoctorStatus/>}/>
 
 </Routes>
 </BrowserRouter>
