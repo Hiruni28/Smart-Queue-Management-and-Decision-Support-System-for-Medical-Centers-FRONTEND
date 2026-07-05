@@ -95,11 +95,15 @@ function StaffSchedules() {
   }
 
   function getDoctorName(id) {
-    return doctors.find((d) => d.doctorId === id)?.doctorName || "—";
-  }
+  return doctors.find((d) => d.doctorId === id)?.doctorName || "—";
+}
+
+function getDoctorRoom(id) {
+  return doctors.find((d) => d.doctorId === id)?.roomNumber || "—";
+}
 
   const inputClass = "w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-colors";
-  const cols = ["ID", "Doctor", "Date", "Start", "End", "Actions"];
+  const cols = ["ID", "Doctor", "Room", "Date", "Start", "End", "Actions"];
 
   return (
     <div className="flex min-h-screen bg-slate-950">
@@ -291,8 +295,15 @@ function StaffSchedules() {
                           className={`border-t border-slate-800/60 transition-colors
                             ${isEditing ? "bg-amber-500/5 border-l-2 border-l-amber-500/50" : "hover:bg-slate-800/40"}`}>
                           <td className="px-5 py-3.5 text-slate-500 font-mono text-xs">{s.scheduleId}</td>
-                          <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">{getDoctorName(s.doctorId)}</td>
-                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{String(s.availableDate).split("T")[0]}</td>
+                          <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">
+                            {getDoctorName(s.doctorId)}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+                            Room {getDoctorRoom(s.doctorId)}
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+                            {String(s.availableDate).split("T")[0]}
+                          </td>
                           <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{s.startTime}</td>
                           <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{s.endTime}</td>
                           <td className="px-5 py-3.5 whitespace-nowrap">
