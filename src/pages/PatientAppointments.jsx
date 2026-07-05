@@ -90,7 +90,15 @@ function PatientAppointments() {
     }
   }, [doctorId]);
 
-  const availableSchedule = schedules.find((s) => s.availableDate === appointmentDate);
+  const today = new Date().toISOString().split("T")[0];
+
+const futureSchedules = schedules.filter(
+  (s) => s.availableDate >= today
+);
+
+const availableSchedule = futureSchedules.find(
+  (s) => s.availableDate === appointmentDate
+);
   const specializations = [...new Set(doctors.map((d) => d.specialization))];
   const filteredDoctors = selectedSpecialization
     ? doctors.filter((d) => d.specialization === selectedSpecialization)
@@ -305,7 +313,14 @@ function PatientAppointments() {
                 className={isEditing ? editSelectClass : selectClass}
               >
                 <option value="">Select Available Date</option>
-                {schedules.map((s) => <option key={s.scheduleId} value={s.availableDate}>{s.availableDate}</option>)}
+                {futureSchedules.map((s) => (
+  <option
+    key={s.scheduleId}
+    value={s.availableDate}
+  >
+    {s.availableDate}
+  </option>
+))}
               </select>
             </div>
 
