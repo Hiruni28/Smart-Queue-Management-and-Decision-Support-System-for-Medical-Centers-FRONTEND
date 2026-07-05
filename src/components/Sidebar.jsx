@@ -38,6 +38,25 @@ const navItems = [
     ),
   },
   {
+    to: "/queue-rules",
+    label: "Queue Rules",
+    icon: (
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M10.5 6h9m-9 6h9m-9 6h9M4.5 6h.008v.008H4.5V6Zm0 6h.008v.008H4.5V12Zm0 6h.008v.008H4.5V18Z"
+        />
+      </svg>
+    ),
+  },
+  {
     to: "/reports",
     label: "Reports",
     icon: (
