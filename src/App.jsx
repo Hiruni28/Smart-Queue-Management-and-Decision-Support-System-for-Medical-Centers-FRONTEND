@@ -5,6 +5,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ManageDoctors from "./pages/ManageDoctors";
 import ManageStaff from "./pages/ManageStaff";
 import ManageQueue from "./pages/ManageQueue";
+import QueueRules from "./pages/QueueRules";
 
 import PatientRegister from "./pages/PatientRegister";
 import PatientLogin from "./pages/PatientLogin";
@@ -18,6 +19,7 @@ import StaffAppointments from "./pages/StaffAppointments";
 import StaffPatients from "./pages/StaffPatients";
 import StaffSchedules from "./pages/StaffSchedules";
 import StaffDoctorStatus from "./pages/StaffDoctorStatus";
+import StaffQueue from "./pages/StaffQueue";
 
 function App() {
 
@@ -57,6 +59,10 @@ return (
 <Route path="/staff-schedules" element={<StaffSchedules/>}/>
 
 <Route path="/staff-doctor-status" element={<StaffDoctorStatus/>}/>
+
+<Route path="/queue-rules" element={<QueueRules/>}/>
+
+<Route path="/staff-queue" element={<StaffQueue/>}/>
 
 </Routes>
 </BrowserRouter>
