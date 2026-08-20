@@ -5,20 +5,51 @@ import StaffSidebar from "../components/StaffSidebar";
 import StaffTopbar from "../components/StaffTopbar";
 
 const statusStyles = {
-  Booked:    "bg-indigo-500/10 border border-indigo-500/20 text-indigo-400",
-  Confirmed: "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400",
-  Completed: "bg-teal-500/10 border border-teal-500/20 text-teal-400",
-  Pending:   "bg-amber-500/10 border border-amber-500/20 text-amber-400",
-  Cancelled: "bg-red-500/10 border border-red-500/20 text-red-400",
+    booked:
+        "bg-indigo-500/10 border border-indigo-500/20 text-indigo-400",
+    confirmed:
+        "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400",
+    completed:
+        "bg-teal-500/10 border border-teal-500/20 text-teal-400",
+    pending:
+        "bg-amber-500/10 border border-amber-500/20 text-amber-400",
+    cancelled:
+        "bg-red-500/10 border border-red-500/20 text-red-400",
 };
 
 function StatusBadge({ status }) {
-  const style = statusStyles[status] ?? "bg-slate-700 border border-slate-600 text-slate-300";
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}>
-      {status}
-    </span>
-  );
+
+    const normalizedStatus =
+  String(status ?? "Unknown")
+    .trim()
+    .toLowerCase();
+
+    const displayStatus =
+      normalizedStatus
+        ? normalizedStatus.charAt(0).toUpperCase() +
+          normalizedStatus.slice(1)
+        : "Unknown";
+
+    const style =
+        statusStyles[normalizedStatus] ??
+        "bg-slate-700 border border-slate-600 text-slate-300";
+
+    return (
+        <span
+            className={`
+                inline-flex
+                items-center
+                px-2.5
+                py-0.5
+                rounded-full
+                text-xs
+                font-medium
+                ${style}
+            `}
+        >
+            {normalizedStatus}
+        </span>
+    );
 }
 
 function Toast({ message, type, onClose }) {
@@ -83,18 +114,73 @@ function StaffAppointments() {
   const [doctorId, setDoctorId] = useState("");
 
   const filteredAppointments = allAppointments.filter((app) => {
-    const patientName = (patients.find(p => p.patientId === app.patientId)?.fullName || "").toLowerCase();
-    const doctorName  = (doctors.find(d => d.doctorId === app.doctorId)?.doctorName || "").toLowerCase();
-    const search = searchText.toLowerCase();
-    return (
-      (patientName.includes(search) || doctorName.includes(search)) &&
-      (!statusFilter || app.status === statusFilter) &&
-      (!dateFilter || app.appointmentDate === dateFilter)
-    );
-  });
+  const patientName = (
+    patients.find(
+      p => Number(p.patientId) === Number(app.patientId)
+    )?.fullName || ""
+  ).toLowerCase();
+
+  const doctorName = (
+    doctors.find(
+      d => Number(d.doctorId) === Number(app.doctorId)
+    )?.doctorName || ""
+  ).toLowerCase();
+
+  const search = searchText
+    .trim()
+    .toLowerCase();
+
+  const normalizedStatus =
+    String(app.status ?? "")
+      .trim()
+      .toLowerCase();
+
+  return (
+    (
+      patientName.includes(search) ||
+      doctorName.includes(search)
+    ) &&
+    (
+      !statusFilter ||
+      normalizedStatus ===
+        statusFilter.toLowerCase()
+    ) &&
+    (
+      !dateFilter ||
+      formatDate(app.appointmentDate) === dateFilter
+    )
+  );
+});
 
   function showToast(message, type = "success") { setToast({ message, type }); }
   function clearToast() { setToast({ message: "", type: "success" }); }
+
+  function formatDate(value) {
+  if (!value) return "";
+
+  return String(value).split("T")[0];
+}
+
+function formatTime(value) {
+  if (!value) return "";
+
+  return String(value).substring(0, 5);
+}
+
+function getToday() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      now.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
 
   async function loadDoctors() {
     try { const res = await api.get("/doctors"); setDoctors(res.data); }
@@ -109,10 +195,35 @@ function StaffAppointments() {
     catch { showToast("Failed to load appointments.", "error"); }
   }
   async function loadManageSchedules(id) {
-    if (!id) { setManageSchedules([]); return; }
-    try { const res = await api.get(`/schedule/${id}`); setManageSchedules(res.data); }
-    catch { setManageSchedules([]); }
+  if (!id) {
+    setManageSchedules([]);
+    return;
   }
+
+  try {
+    const res = await api.get(
+      `/schedule/${id}`
+    );
+
+    setManageSchedules(
+      Array.isArray(res.data)
+        ? res.data
+        : []
+    );
+  } catch (error) {
+    console.error(
+      "LOAD SCHEDULE ERROR:",
+      error
+    );
+
+    setManageSchedules([]);
+
+    showToast(
+      "Failed to load doctor schedule.",
+      "error"
+    );
+  }
+}
   async function loadAppointments() {
     if (!doctorId) { setAppointments([]); return; }
     setLoading(true);
@@ -121,49 +232,194 @@ function StaffAppointments() {
     finally { setLoading(false); }
   }
 
-  async function saveAppointment() {
-    if (!patientId || !manageDoctorId || !appointmentDate || !appointmentTime) {
-      showToast("Please fill all fields.", "error"); return;
+  const saveAppointment = async () => {
+  if (
+    !patientId ||
+    !manageDoctorId ||
+    !appointmentDate ||
+    !appointmentTime
+  ) {
+    showToast("Please fill all fields.", "error");
+    return;
+  }
+
+  const data = {
+    patientId: Number(patientId),
+    doctorId: Number(manageDoctorId),
+    appointmentDate,
+    appointmentTime
+  };
+
+  try {
+    if (editingId) {
+      await api.put(
+        `/appointment/staff/${editingId}`,
+        data
+      );
+
+      showToast("Appointment updated successfully.");
+    } else {
+      await api.post(
+        "/appointment/staff",
+        {
+          ...data,
+          status: "Booked"
+        }
+      );
+
+      showToast("Appointment created successfully.");
     }
-    const data = { patientId: Number(patientId), doctorId: Number(manageDoctorId), appointmentDate, appointmentTime, status: "Booked" };
+
+    clearForm();
+
+    await loadAllAppointments();
+
+    if (doctorId) {
+      await loadAppointments();
+    }
+  } catch (error) {
+    showToast(
+      error.response?.data?.message ||
+      error.response?.data ||
+      "Operation failed.",
+      "error"
+    );
+  }
+};
+
+ async function editAppointment(app) {
+    const status = String(app.status || "")
+        .trim()
+        .toLowerCase();
+
+      // Only Booked appointments can be edited.
+      if (status !== "booked") {
+          showToast(
+              "Only booked appointments can be edited.",
+              "error"
+          );
+          return;
+      }
+
+      setEditingId(app.appointmentId);
+
+      const patient = patients.find(
+          (p) =>
+              Number(p.patientId) ===
+              Number(app.patientId)
+      );
+
+      const doctor = doctors.find(
+          (d) =>
+              Number(d.doctorId) ===
+              Number(app.doctorId)
+      );
+
+      setPatientId(
+          patient
+              ? String(patient.patientId)
+              : String(app.patientId || "")
+      );
+
+      setManageDoctorId(
+          doctor
+              ? String(doctor.doctorId)
+              : String(app.doctorId || "")
+      );
+
+      setAppointmentDate(
+          String(app.appointmentDate || "").split("T")[0]
+      );
+
+      setAppointmentTime(
+          formatTime(app.appointmentTime)
+      );
+
+      setManageSchedules([]);
+
+      // Because this function is async, await is valid here.
+      await loadManageSchedules(app.doctorId);
+
+      window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+      });
+  }
+
+  const deleteAppointment = async (id) => {
+    if (!window.confirm("Delete this appointment?")) {
+      return;
+    }
+
     try {
-      if (editingId) { await api.put(`/appointment/staff/${editingId}`, data); showToast("Appointment updated successfully."); }
-      else           { await api.post("/appointment/staff", data); showToast("Appointment created successfully."); }
-      clearForm(); loadAllAppointments();
-    } catch (error) { showToast(error.response?.data?.message || "Operation failed.", "error"); }
-  }
+      await api.delete(`/appointment/staff/${id}`);
 
-  function editAppointment(app) {
-    setEditingId(app.appointmentId);
-    const patient = patients.find(p => p.fullName === app.patientName);
-    const doctor  = doctors.find(d => d.doctorId === app.doctorId);
-    setPatientId(patient ? String(patient.patientId) : "");
-    setManageDoctorId(doctor ? String(doctor.doctorId) : "");
-    setAppointmentDate(app.appointmentDate);
-    setAppointmentTime(app.appointmentTime);
-    loadManageSchedules(app.doctorId);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+      showToast("Appointment deleted.");
 
-  async function deleteAppointment(id) {
-    if (!window.confirm("Delete this appointment?")) return;
-    try { await api.delete(`/appointment/staff/${id}`); showToast("Appointment deleted."); loadAllAppointments(); }
-    catch { showToast("Delete failed.", "error"); }
-  }
+      await loadAllAppointments();
+
+      if (doctorId) {
+        await loadAppointments();
+      }
+    } catch (error) {
+      showToast(
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Delete failed.",
+        "error"
+      );
+    }
+  };
 
   function clearForm() {
     setEditingId(null); setPatientId(""); setManageDoctorId("");
     setAppointmentDate(""); setAppointmentTime(""); setManageSchedules([]);
   }
 
-  async function update(id, status) {
-    try { await api.put(`/appointment/status/${id}?status=${status}`); showToast(`Appointment marked as ${status}.`); loadAppointments(); }
-    catch { showToast("Failed to update appointment status.", "error"); }
-  }
+  const update = async (id, status) => {
+    try {
+      await api.put(
+        `/appointment/status/${id}`,
+        null,
+        {
+          params: {
+            status
+          }
+        }
+      );
+
+      showToast(
+        `Appointment marked as ${status}.`
+      );
+
+      await loadAllAppointments();
+
+      if (doctorId) {
+        await loadAppointments();
+      }
+    } catch (error) {
+      showToast(
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Failed to update appointment status.",
+        "error"
+      );
+    }
+  };
 
   useEffect(() => { loadDoctors(); loadPatients(); loadAllAppointments(); }, []);
   useEffect(() => { if (manageDoctorId) loadManageSchedules(manageDoctorId); }, [manageDoctorId]);
   useEffect(() => { loadAppointments(); }, [doctorId]);
+  useEffect(() => {if (!doctorId) {return;}
+
+  const interval = setInterval(() => {
+    loadAppointments();
+  }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [doctorId]);
 
   const selectedDoctor = doctors.find(d => String(d.doctorId) === String(doctorId));
   const todayCols = ["ID", "Patient", "Doctor", "Specialization", "Room", "Time", "Status", "Actions"];
@@ -242,7 +498,13 @@ function StaffAppointments() {
               <div>
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Patient</label>
                 <div className="relative">
-                  <select value={patientId} onChange={(e) => setPatientId(e.target.value)} className={selectClass}>
+                  <select
+                    value={patientId}
+                    onChange={(e) => {
+                      setPatientId(e.target.value);
+                    }}
+                    className={selectClass}
+                  >
                     <option value="">Select Patient</option>
                     {patients.map(p => <option key={p.patientId} value={p.patientId}>{p.fullName}</option>)}
                   </select>
@@ -255,7 +517,18 @@ function StaffAppointments() {
               <div>
                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Doctor</label>
                 <div className="relative">
-                  <select value={manageDoctorId} onChange={(e) => setManageDoctorId(e.target.value)} className={selectClass}>
+                  <select
+                    value={manageDoctorId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setManageDoctorId(value);
+                      setAppointmentDate("");
+                      setAppointmentTime("");
+                      setManageSchedules([]);
+                    }}
+                    className={selectClass}
+                  >
                     <option value="">Select Doctor</option>
                     {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>{d.doctorName} — {d.specialization}</option>)}
                   </select>
@@ -271,8 +544,16 @@ function StaffAppointments() {
                   <select value={appointmentDate} onChange={(e) => { setAppointmentDate(e.target.value); setAppointmentTime(""); }} className={selectClass}>
                     <option value="">Select Date</option>
                     {manageSchedules
-                      .filter((s) => { const today = new Date(); today.setHours(0,0,0,0); return new Date(s.availableDate) >= today; })
-                      .map(s => <option key={s.scheduleId} value={s.availableDate}>{s.availableDate}</option>)}
+                      .filter((s) => {
+                        return formatDate(s.availableDate) >= getToday();
+                      })
+                      .map(s => {const date = formatDate(s.availableDate);
+                        return (
+                          <option key={s.scheduleId} value={date}>
+                            {date}
+                          </option>
+                        );
+                      })}
                   </select>
                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -286,8 +567,22 @@ function StaffAppointments() {
                   <div className="relative">
                     <select value={appointmentTime} onChange={(e) => setAppointmentTime(e.target.value)} className={selectClass}>
                       <option value="">Select Time</option>
-                      {manageSchedules.filter(s => s.availableDate === appointmentDate)
-                        .map(s => <option key={s.scheduleId} value={s.startTime}>{s.startTime} — {s.endTime}</option>)}
+                      {manageSchedules
+                        .filter(
+                          (schedule) =>
+                            formatDate(schedule.availableDate) ===
+                            appointmentDate
+                        )
+                        .map((schedule) => (
+                          <option
+                            key={schedule.scheduleId}
+                            value={formatTime(schedule.startTime)}
+                          >
+                            {formatTime(schedule.startTime)}
+                            {" — "}
+                            {formatTime(schedule.endTime)}
+                          </option>
+                        ))}
                     </select>
                     <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -309,6 +604,181 @@ function StaffAppointments() {
               >
                 {isEditing ? "Update Appointment" : "Create Appointment"}
               </button>
+            </div>
+          </div>
+
+          {/* ── Today's appointments by doctor ── */}
+          <div className="mb-6">
+            <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+              Filter by Doctor — Today's View
+            </label>
+
+            <div className="relative w-80">
+              <select
+                value={doctorId}
+                onChange={(e) => setDoctorId(e.target.value)}
+                className="w-full appearance-none bg-slate-900 border border-slate-700 text-white text-sm px-4 py-2.5 rounded-xl pr-10
+                focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/50 transition-colors"
+              >
+                <option value="">Select a doctor…</option>
+
+                {doctors.map((d) => (
+                  <option key={d.doctorId} value={d.doctorId}>
+                    {d.doctorName} — {d.specialization}
+                  </option>
+                ))}
+              </select>
+
+              <svg
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-8">
+            <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-white">
+                  {selectedDoctor
+                    ? `${selectedDoctor.doctorName} · ${selectedDoctor.specialization}`
+                    : "Today's Appointments"}
+                </h2>
+
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {doctorId
+                    ? `${appointments.length} appointment${
+                        appointments.length !== 1 ? "s" : ""
+                      } today`
+                    : "No doctor selected"}
+                </p>
+              </div>
+
+                {doctorId && (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 rounded-full px-3 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+                    Live
+                  </span>
+                )}
+              </div>
+
+              <div className="overflow-x-auto">
+
+                {!doctorId && (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-3">
+                      <svg
+                        className="w-5 h-5 text-slate-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+
+                    <p className="text-sm text-slate-400 font-medium">
+                      No doctor selected
+                    </p>
+
+                    <p className="text-xs text-slate-600 mt-1">
+                      Choose a doctor above to see today's appointments.
+                    </p>
+                  </div>
+                )}
+
+              {doctorId && loading && (
+                <div className="flex items-center justify-center py-16 gap-2 text-slate-500 text-sm">
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+
+                  Loading appointments…
+                </div>
+              )}
+
+              {doctorId && !loading && appointments.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-3"> 
+                    <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> 
+                    </svg> 
+                    </div> 
+                    <p className="text-sm text-slate-400 font-medium">No appointments today</p> 
+                    <p className="text-xs text-slate-600 mt-1">This doctor has no appointments scheduled for today.</p>
+                </div>
+              )}
+
+              {doctorId && !loading && appointments.length > 0 && (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-800">
+                      {todayCols.map(col => (
+                        <th key={col} className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointments.map(a => (
+                      <tr key={a.appointmentId} className="border-t border-slate-800/60 hover:bg-slate-800/40 transition-colors">
+                        <td className="px-5 py-3.5 text-slate-500 font-mono text-xs">{a.appointmentId}</td>
+                        <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">{a.patientName}</td>
+                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.doctorName}</td>
+                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.specialization}</td>
+                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.roomNumber}</td>
+                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+                          {formatTime(a.appointmentTime)}
+                        </td>
+                        <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge status={a.status} /></td>
+                        <td className="px-5 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+
+                            {/* Complete today's appointment */}
+                            {String(a.status ?? "")
+                              .trim()
+                              .toLowerCase() === "confirmed" && (
+                              <button
+                                onClick={() => update(a.appointmentId, "Completed")}
+                                className="text-xs font-medium px-3 py-1.5 rounded-lg
+                                  bg-emerald-500/10 border border-emerald-500/20
+                                  text-emerald-400 hover:bg-emerald-500/20
+                                  transition-colors"
+                              >
+                                Complete
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
@@ -383,159 +853,282 @@ function StaffAppointments() {
                   </thead>
                   <tbody>
                     {filteredAppointments.map(app => {
-                      const doctor = doctors.find(d => d.doctorId === app.doctorId);
-                      const isRowEditing = editingId === app.appointmentId;
-                      return (
-                        <tr key={app.appointmentId}
-                          className={`border-t border-slate-800/60 transition-colors
-                            ${isRowEditing ? "bg-amber-500/5 border-l-2 border-l-amber-500/50" : "hover:bg-slate-800/40"}`}>
-                          <td className="px-5 py-3.5 text-slate-500 font-mono text-xs">{app.appointmentId}</td>
-                          <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">
-                            {patients.find(p => p.patientId === app.patientId)?.fullName || "—"}
-                          </td>
-                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
-                            {doctor ? `${doctor.doctorName} — ${doctor.specialization}` : "—"}
-                          </td>
-                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{app.appointmentDate}</td>
-                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{app.appointmentTime}</td>
-                          <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge status={app.status} /></td>
-                          <td className="px-5 py-3.5 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => editAppointment(app)}
-                                className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors
-                                  ${isRowEditing
-                                    ? "bg-amber-500/20 border-amber-500/30 text-amber-400 cursor-default"
-                                    : "bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20"}`}>
-                                {isRowEditing ? "Editing…" : "Edit"}
-                              </button>
-                              <button onClick={() => deleteAppointment(app.appointmentId)}
-                                className="text-xs font-medium px-3 py-1.5 rounded-lg border bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors">
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
+
+                        const doctor =
+                            doctors.find(
+                                d =>
+                                    Number(d.doctorId) ===
+                                    Number(app.doctorId)
+                            );
+
+                        const isRowEditing =
+                            editingId === app.appointmentId;
+
+                        const status =
+                            String(app.status || "")
+                                .trim()
+                                .toLowerCase();
+
+                        // ==========================================
+                        // STAFF EDIT PERMISSION
+                        // ==========================================
+
+                        const canEdit =
+                            status === "booked";
+
+                        // ==========================================
+                        // CONFIRM PERMISSION
+                        // ==========================================
+
+                        const canConfirm =
+                            status === "booked";
+
+                        // ==========================================
+                        // CANCEL PERMISSION
+                        // ==========================================
+
+                        const canCancel =
+                            status === "booked" ||
+                            status === "confirmed";
+
+                        return (
+                            <tr
+                                key={app.appointmentId}
+                                className={`
+                                    border-t
+                                    border-slate-800/60
+                                    transition-colors
+
+                                    ${
+                                        isRowEditing
+                                            ? "bg-amber-500/5 border-l-2 border-l-amber-500/50"
+                                            : "hover:bg-slate-800/40"
+                                    }
+                                `}
+                            >
+
+                                {/* ID */}
+
+                                <td className="px-5 py-3.5 text-slate-500 font-mono text-xs">
+                                    {app.appointmentId}
+                                </td>
+
+
+                                {/* PATIENT */}
+
+                                <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">
+
+                                    {patients.find(
+                                        p =>
+                                            Number(p.patientId) ===
+                                            Number(app.patientId)
+                                    )?.fullName || "—"}
+
+                                </td>
+
+
+                                {/* DOCTOR */}
+
+                                <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+
+                                    {doctor
+                                        ? `${doctor.doctorName} — ${doctor.specialization}`
+                                        : app.doctorName || "—"
+                                    }
+
+                                </td>
+
+
+                                {/* DATE */}
+
+                                <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+                                  {formatDate(app.appointmentDate) || "—"}
+                                </td>
+
+
+                                {/* TIME */}
+
+                                <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+                                  {formatTime(app.appointmentTime) || "—"}
+                                </td>
+
+
+                                {/* STATUS */}
+
+                                <td className="px-5 py-3.5 whitespace-nowrap">
+
+                                    <StatusBadge
+                                        status={
+                                            app.status || "Unknown"
+                                        }
+                                    />
+
+                                </td>
+
+
+                                {/* ACTIONS */}
+
+                                <td className="px-5 py-3.5 whitespace-nowrap">
+
+                                    <div className="flex items-center gap-2">
+
+                                        {/* ================================= */}
+                                        {/* CONFIRM */}
+                                        {/* ================================= */}
+
+                                        {canConfirm && (
+                                            <button
+                                                onClick={() =>
+                                                    update(
+                                                        app.appointmentId,
+                                                        "Confirmed"
+                                                    )
+                                                }
+                                                className="
+                                                    text-xs
+                                                    font-medium
+                                                    px-3
+                                                    py-1.5
+                                                    rounded-lg
+                                                    bg-indigo-500/10
+                                                    border
+                                                    border-indigo-500/20
+                                                    text-indigo-400
+                                                    hover:bg-indigo-500/20
+                                                    transition-colors
+                                                "
+                                            >
+                                                Confirm
+                                            </button>
+                                        )}
+
+
+                                        {/* ================================= */}
+                                        {/* CANCEL */}
+                                        {/* ================================= */}
+
+                                        {canCancel && (
+                                            <button
+                                                onClick={() =>
+                                                    update(
+                                                        app.appointmentId,
+                                                        "Cancelled"
+                                                    )
+                                                }
+                                                className="
+                                                    text-xs
+                                                    font-medium
+                                                    px-3
+                                                    py-1.5
+                                                    rounded-lg
+                                                    bg-red-500/10
+                                                    border
+                                                    border-red-500/20
+                                                    text-red-400
+                                                    hover:bg-red-500/20
+                                                    transition-colors
+                                                "
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
+
+
+                                        {/* ================================= */}
+                                        {/* EDIT */}
+                                        {/* ================================= */}
+
+                                        <button
+                                            onClick={() =>
+                                                editAppointment(app)
+                                            }
+                                            disabled={
+                                                !canEdit ||
+                                                isRowEditing
+                                            }
+                                            className={`
+                                                text-xs
+                                                font-medium
+                                                px-3
+                                                py-1.5
+                                                rounded-lg
+                                                border
+                                                transition-colors
+
+                                                ${
+                                                    !canEdit
+                                                        ? `
+                                                            bg-slate-800
+                                                            border-slate-700
+                                                            text-slate-500
+                                                            cursor-not-allowed
+                                                          `
+                                                        : isRowEditing
+                                                            ? `
+                                                                bg-amber-500/20
+                                                                border-amber-500/30
+                                                                text-amber-400
+                                                                cursor-default
+                                                              `
+                                                            : `
+                                                                bg-amber-500/10
+                                                                border-amber-500/20
+                                                                text-amber-400
+                                                                hover:bg-amber-500/20
+                                                              `
+                                                }
+                                            `}
+                                        >
+
+                                            {!canEdit
+                                                ? "Locked"
+                                                : isRowEditing
+                                                    ? "Editing…"
+                                                    : "Edit"
+                                            }
+
+                                        </button>
+
+
+                                        {/* ================================= */}
+                                        {/* DELETE */}
+                                        {/* ================================= */}
+
+                                        <button
+                                            onClick={() =>
+                                                deleteAppointment(
+                                                    app.appointmentId
+                                                )
+                                            }
+                                            className="
+                                                text-xs
+                                                font-medium
+                                                px-3
+                                                py-1.5
+                                                rounded-lg
+                                                border
+                                                bg-red-500/10
+                                                border-red-500/20
+                                                text-red-400
+                                                hover:bg-red-500/20
+                                                transition-colors
+                                            "
+                                        >
+                                            Delete
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        );
                     })}
                   </tbody>
                 </table>
               )}
             </div>
           </div>
-
-          {/* ── Today's appointments by doctor ── */}
-          <div className="mb-6">
-            <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-              Filter by Doctor — Today's View
-            </label>
-            <div className="relative w-80">
-              <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}
-                className="w-full appearance-none bg-slate-900 border border-slate-700 text-white text-sm px-4 py-2.5 rounded-xl pr-10
-                  focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/50 transition-colors">
-                <option value="">Select a doctor…</option>
-                {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>{d.doctorName} — {d.specialization}</option>)}
-              </select>
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-white">
-                  {selectedDoctor ? `${selectedDoctor.doctorName} · ${selectedDoctor.specialization}` : "Today's Appointments"}
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {doctorId ? `${appointments.length} appointment${appointments.length !== 1 ? "s" : ""} today` : "No doctor selected"}
-                </p>
-              </div>
-              {doctorId && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 rounded-full px-3 py-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-                  Live
-                </span>
-              )}
-            </div>
-
-            <div className="overflow-x-auto">
-              {!doctorId && (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-3">
-                    <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-slate-400 font-medium">No doctor selected</p>
-                  <p className="text-xs text-slate-600 mt-1">Choose a doctor above to see today's appointments.</p>
-                </div>
-              )}
-              {doctorId && loading && (
-                <div className="flex items-center justify-center py-16 gap-2 text-slate-500 text-sm">
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Loading appointments…
-                </div>
-              )}
-              {doctorId && !loading && appointments.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-3">
-                    <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-slate-400 font-medium">No appointments today</p>
-                  <p className="text-xs text-slate-600 mt-1">This doctor has no appointments scheduled for today.</p>
-                </div>
-              )}
-              {doctorId && !loading && appointments.length > 0 && (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800">
-                      {todayCols.map(col => (
-                        <th key={col} className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{col}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map(a => (
-                      <tr key={a.appointmentId} className="border-t border-slate-800/60 hover:bg-slate-800/40 transition-colors">
-                        <td className="px-5 py-3.5 text-slate-500 font-mono text-xs">{a.appointmentId}</td>
-                        <td className="px-5 py-3.5 text-white font-medium whitespace-nowrap">{a.patientName}</td>
-                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.doctorName}</td>
-                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.specialization}</td>
-                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.roomNumber}</td>
-                        <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{a.appointmentTime}</td>
-                        <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge status={a.status} /></td>
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => update(a.appointmentId, "Confirmed")}
-                              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 transition-colors">
-                              Confirm
-                            </button>
-                            <button onClick={() => update(a.appointmentId, "Completed")}
-                              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
-                              Complete
-                            </button>
-                            <button onClick={() => update(a.appointmentId, "Cancelled")}
-                              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors">
-                              Cancel
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-
         </main>
       </div>
 
