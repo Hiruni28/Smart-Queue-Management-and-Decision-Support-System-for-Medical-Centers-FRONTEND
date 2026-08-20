@@ -23,9 +23,9 @@ function Home() {
 
               <div
                 className="
-                  w-10
-                  h-10
-                  rounded-xl
+                  w-20
+                  h-20
+                  rounded-2xl
                   bg-teal-600
                   flex
                   items-center
@@ -33,9 +33,12 @@ function Home() {
                   shadow-sm
                 "
               >
-                <span className="text-white font-bold text-lg">
-                  M
-                </span>
+                <div className="w-24 h-24 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+              <img 
+                src="/logo.png"  
+                alt="MediQueue Logo" 
+              />
+            </div>
               </div>
 
               <div>
