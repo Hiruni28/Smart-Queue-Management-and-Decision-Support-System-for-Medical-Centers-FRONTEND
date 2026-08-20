@@ -10,6 +10,7 @@ function StaffSchedules() {
   const [availableDate, setAvailableDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [maxPatients, setMaxPatients] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("");
@@ -32,41 +33,124 @@ function StaffSchedules() {
   }
 
   async function loadSchedules() {
-    try {
-      const res = await api.get("/schedule");
-      setSchedules(res.data);
-    } catch {
-      showMessage("Failed to load schedules", "error");
-    }
+  try {
+    const res = await api.get("/schedule");
+    setSchedules(res.data);
+  } catch {
+    showMessage("Failed to load schedules", "error");
   }
+}
+
+function getTodayDate() {
+  const today = new Date();
+
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
   async function save() {
-    if (!doctorId || !availableDate || !startTime || !endTime) {
-      showMessage("Fill all fields", "error");
-      return;
-    }
-    try {
-      const payload = {
-        scheduleId: editingId,
-        doctorId: Number(doctorId),
-        availableDate,
-        startTime: startTime + ":00",
-        endTime: endTime + ":00",
-      };
-      if (editingId) {
-        await api.put("/schedule", payload);
-        showMessage("Schedule updated successfully", "success");
-      } else {
-        await api.post("/schedule", payload);
-        showMessage("Schedule added successfully", "success");
-      }
-      clearForm();
-      loadSchedules();
-    } catch (err) {
-      console.log(err);
-      showMessage("Failed to save schedule", "error");
-    }
+  if (
+    !doctorId ||
+    !availableDate ||
+    !startTime ||
+    !endTime ||
+    !maxPatients
+  ) {
+    showMessage("Fill all fields", "error");
+    return;
   }
+
+  const patientLimit = Number(maxPatients);
+
+  if (!Number.isInteger(patientLimit) || patientLimit <= 0) {
+    showMessage(
+      "Maximum patients must be greater than zero",
+      "error"
+    );
+    return;
+  }
+
+  if (startTime >= endTime) {
+    showMessage(
+      "End time must be later than start time",
+      "error"
+    );
+    return;
+  }
+
+  try {
+    const payload = {
+  scheduleId: editingId,
+  doctorId: Number(doctorId),
+  availableDate,
+
+  startTime:
+    startTime.length === 5
+      ? `${startTime}:00`
+      : startTime,
+
+  endTime:
+    endTime.length === 5
+      ? `${endTime}:00`
+      : endTime,
+
+  maxPatients: Number(maxPatients),
+};
+
+    console.log("SENDING SCHEDULE:", payload);
+
+    let response;
+
+    if (editingId) {
+      response = await api.put("/schedule", payload);
+      showMessage(
+        "Schedule updated successfully",
+        "success"
+      );
+    } else {
+      response = await api.post("/schedule", payload);
+      showMessage(
+        "Schedule added successfully",
+        "success"
+      );
+    }
+
+    console.log(
+      "SCHEDULE RESPONSE:",
+      response.data
+    );
+
+    clearForm();
+    await loadSchedules();
+
+  } catch (err) {
+    console.error(
+      "SAVE SCHEDULE ERROR:",
+      err
+    );
+
+    const serverMessage =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      "Failed to save schedule";
+
+    console.error(
+      "SERVER RESPONSE:",
+      serverMessage
+    );
+
+    showMessage(
+      typeof serverMessage === "string"
+        ? serverMessage
+        : "Failed to save schedule",
+      "error"
+    );
+  }
+}
 
   async function remove(id) {
     try {
@@ -78,32 +162,87 @@ function StaffSchedules() {
     }
   }
 
-  function edit(s) {
-    setEditingId(s.scheduleId);
-    setDoctorId(String(s.doctorId));
-    setAvailableDate(String(s.availableDate).split("T")[0]);
-    setStartTime(String(s.startTime).substring(0, 5));
-    setEndTime(String(s.endTime).substring(0, 5));
-  }
+ function edit(s) {
+
+  setEditingId(
+    Number(s.scheduleId)
+  );
+
+  setDoctorId(
+    String(s.doctorId)
+  );
+
+  setAvailableDate(
+    String(
+      s.availableDate || ""
+    ).split("T")[0]
+  );
+
+  setStartTime(
+    String(
+      s.startTime || ""
+    ).substring(0, 5)
+  );
+
+  setEndTime(
+    String(
+      s.endTime || ""
+    ).substring(0, 5)
+  );
+
+  setMaxPatients(
+    String(s.maxPatients ?? "")
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 
   function clearForm() {
-    setEditingId(null);
-    setDoctorId("");
-    setAvailableDate("");
-    setStartTime("");
-    setEndTime("");
-  }
+  setEditingId(null);
+  setDoctorId("");
+  setAvailableDate("");
+  setStartTime("");
+  setEndTime("");
+  setMaxPatients("");
+}
 
   function getDoctorName(id) {
-  return doctors.find((d) => d.doctorId === id)?.doctorName || "—";
+
+  return (
+    doctors.find(
+      d =>
+        Number(d.doctorId) ===
+        Number(id)
+    )?.doctorName ||
+    "—"
+  );
 }
 
 function getDoctorRoom(id) {
-  return doctors.find((d) => d.doctorId === id)?.roomNumber || "—";
-}
 
+  return (
+    doctors.find(
+      d =>
+        Number(d.doctorId) ===
+        Number(id)
+    )?.roomNumber ||
+    "—"
+  );
+}
   const inputClass = "w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-colors";
-  const cols = ["ID", "Doctor", "Room", "Date", "Start", "End", "Actions"];
+   const cols = [
+  "ID",
+  "Doctor",
+  "Room",
+  "Date",
+  "Start",
+  "End",
+  "Maximum Patients",
+  "Actions"
+];
 
   return (
     <div className="flex min-h-screen bg-slate-950">
@@ -207,10 +346,14 @@ function getDoctorRoom(id) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Available Date</label>
+                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">
+                  Available Date
+                </label>
+
                 <input
                   type="date"
                   value={availableDate}
+                  min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setAvailableDate(e.target.value)}
                   className={inputClass}
                 />
@@ -227,11 +370,29 @@ function getDoctorRoom(id) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">End Time</label>
+                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">
+                  End Time
+                </label>
+
                 <input
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">
+                  Maximum Patients
+                </label>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={maxPatients}
+                  onChange={(e) => setMaxPatients(e.target.value)}
+                  placeholder="e.g. 20"
                   className={inputClass}
                 />
               </div>
@@ -305,8 +466,15 @@ function getDoctorRoom(id) {
                             {String(s.availableDate).split("T")[0]}
                           </td>
                           <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{s.startTime}</td>
-                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">{s.endTime}</td>
-                          <td className="px-5 py-3.5 whitespace-nowrap">
+                          <td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+  {s.endTime}
+</td>
+
+<td className="px-5 py-3.5 text-slate-300 whitespace-nowrap">
+  {s.maxPatients}
+</td>
+
+<td className="px-5 py-3.5 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => { edit(s); window.scrollTo({ top: 0, behavior: "smooth" }); }}
