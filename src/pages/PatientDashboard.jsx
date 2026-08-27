@@ -9,12 +9,10 @@ function PatientDashboard() {
         useNavigate();
 
     function logout() {
+    localStorage.removeItem("patient");
+    localStorage.removeItem("patientId");
 
-        localStorage.removeItem("patient");
-
-        localStorage.removeItem("patientId");
-
-        navigate("/patient-login");
+    navigate("/");
     }
 
     return (
